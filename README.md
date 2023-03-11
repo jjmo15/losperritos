@@ -67,7 +67,7 @@ npm run lint:fix
 npm test
 ```
 
-## What's next
+## What's nextt
 
 Please check out [LoopBack 4 documentation](https://loopback.io/doc/en/lb4/) to
 understand how you can continue to add features to this application.
