@@ -4,12 +4,15 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'PostgresqlDS',
   connector: 'postgresql',
-  url: 'postgresql://postgres:josem1598@localhost/dbPerritos',
-  host: 'localhost',
+  //url: 'postgresql://postgres:123456789@localhost/dbPerritos',
+  //url: 'postgresql://perritos.postgres.database.azure.com',
+  url: '',
+  host: 'perritos.postgres.database.azure.com',
   port: 5432,
-  user: 'postgres',
-  password: 'josem1598',
-  database: 'dbPerritos'
+  user: 'perritos',
+  password: 'Pass123*',
+  database: 'dbPerritos',
+  ssl: true
 };
 
 // Observe application's life cycle to disconnect the datasource when
