@@ -1,38 +1,41 @@
-name: CI
+trigger:
+- main
 
-on:
-  push:
-    branches: ['main']
-  pull_request:
-    branches: ['main']
+pool:
+  vmImage: 'ubuntu-latest'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+strategy:
+  matrix:
+    node-version:
+      - '14.x'
 
-    strategy:
-      matrix:
-        node-version: [14.x]
+steps:
+- script: |
+    echo "Installing Node.js version $NODE_VERSION..."
+    sudo apt-get update && sudo apt-get install -y curl
+    curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    echo "Node.js version $NODE_VERSION installed successfully!"
+  displayName: 'Install Node.js'
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build --if-present
-      #- run: npm test
-      - name: build and push to docker
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ${{ github.sha }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ github.repository }}
-          tag_with_ref: true
-          tag_with_sha: true
+- task: NodeTool@0
+  inputs:
+    versionSpec: '$(node-version)'
+  displayName: 'Use Node.js'
 
+- script: |
+    npm ci
+    npm run build --if-present
+    #npm test
+  displayName: 'Install dependencies and build'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHub'
+    repository: 'myimage'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      $(node-version)-$(Build.SourceVersion)
+      $(node-version)-latest
+  displayName: 'Build and push Docker image'
