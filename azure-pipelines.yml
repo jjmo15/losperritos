@@ -2,40 +2,20 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
-
-strategy:
-  matrix:
-    node-version:
-      - '14.x'
+  vmImage: ubuntu-latest
 
 steps:
-- script: |
-    echo "Installing Node.js version $NODE_VERSION..."
-    sudo apt-get update && sudo apt-get install -y curl
-    curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    echo "Node.js version $NODE_VERSION installed successfully!"
-  displayName: 'Install Node.js'
+- checkout: self
+  submodules: recursive
 
 - task: NodeTool@0
   inputs:
-    versionSpec: '$(node-version)'
-  displayName: 'Use Node.js'
+    versionSpec: '14.x'
+  displayName: 'Install Node.js'
 
 - script: |
     npm ci
     npm run build --if-present
-    #npm test
-  displayName: 'Install dependencies and build'
+  displayName: 'Install and build the project'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: 'DockerHub'
-    repository: 'myimage'
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-    tags: |
-      $(node-version)-$(Build.SourceVersion)
-      $(node-version)-latest
-  displayName: 'Build and push Docker image'
+
